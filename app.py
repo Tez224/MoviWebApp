@@ -1,10 +1,14 @@
 import os
 
-from flask import Flask
+from flask import Flask, flash, redirect, render_template, request
 from data_manager import DataManager
+from dotenv import load_dotenv
 from models import db, Movie, User
 
+load_dotenv()
+
 app = Flask(__name__)
+app.secret_key = os.environ.get('SECRET_KEY', 'fallback-key')
 
 # Create absolute path to the 'data/movies.db' file
 basedir = os.path.abspath(os.path.dirname(__file__))
@@ -17,11 +21,26 @@ db.init_app(app)  # Link the database and the app.
 
 data_manager = DataManager() # Create an object of DataManager class
 
-@app.route('/')
+@app.route('/', methods=['Get', 'POST'])
 def home():
-    return "Welcome to MoviWeb App!"
+    if request.method == 'POST':
+        name = request.form['name']
+
+        if name:
+            new_user = User(name=name)
+            db.session.add(new_user)
+            db.session.commit()
+            flash(f"User {name} added successfully!", "success")
+            return redirect('/')
+        else:
+            flash("Please enter a valid name.", "error")
+
+    users = data_manager.get_users()
+    return render_template('home.html', users=users)
+
 
 if __name__ == '__main__':
+    # Ensure the 'data/' folder really exists at runtime
     os.makedirs('data', exist_ok=True)
 
     with app.app_context():
