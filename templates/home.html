@@ -1,14 +1,6 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <title>Movie App – Users</title>
+{% extends "base.html" %}
 
-    <!-- Optional: Link to your CSS file -->
-    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
-</head>
-<body>
-
+{% block content %}
     <h1>🎬 Welcome to the Movie App</h1>
 
     <!-- Flash messages -->
@@ -39,6 +31,4 @@
             <li>No users yet!</li>
         {% endfor %}
     </ul>
-
-</body>
-</html>
+{% endblock %}
