@@ -21,23 +21,25 @@ db.init_app(app)  # Link the database and the app.
 
 data_manager = DataManager() # Create an object of DataManager class
 
-@app.route('/', methods=['Get', 'POST'])
+@app.route('/', methods=['Get'])
 def home():
-    if request.method == 'POST':
-        name = request.form['name']
-
-        if name:
-            new_user = User(name=name)
-            db.session.add(new_user)
-            db.session.commit()
-            flash(f"User {name} added successfully!", "success")
-            return redirect('/')
-        else:
-            flash("Please enter a valid name.", "error")
-
     users = data_manager.get_users()
     return render_template('home.html', users=users)
 
+
+@app.route('/users', methods=['POST'])
+def add_user():
+    name = request.form['name']
+
+    if name:
+        new_user = User(name=name)
+        db.session.add(new_user)
+        db.session.commit()
+        flash(f"User {name} added successfully!", "success")
+    else:
+        flash("Please enter a valid name.", "error")
+
+    return redirect('/')
 
 if __name__ == '__main__':
     # Ensure the 'data/' folder really exists at runtime
