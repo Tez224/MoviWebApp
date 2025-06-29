@@ -1,25 +1,51 @@
 import os
 
 from flask import Flask, flash, redirect, render_template, request, url_for
+from sqlalchemy.exc import SQLAlchemyError
+
 from data_manager import DataManager
 from dotenv import load_dotenv
 from models import db, Movie, User
 
-load_dotenv()
+# ------------------ Load Environment ------------------
+try:
+    load_dotenv()
+    OMDB_API_KEY = os.environ["OMDB_API_KEY"]
+    SECRET_KEY = os.environ.get("SECRET_KEY", "fallback-key")
+except KeyError as e:
+    raise RuntimeError(f"Missing required environment variable: {e}")
 
+# ------------------ Flask App Setup ------------------
 app = Flask(__name__)
-app.secret_key = os.environ.get('SECRET_KEY', 'fallback-key')
+app.secret_key = SECRET_KEY
 
-# Create absolute path to the 'data/movies.db' file
-basedir = os.path.abspath(os.path.dirname(__file__))
-database_path = os.path.join(basedir, 'data', 'movies.db')
+# ------------------ Database Configuration ------------------
+try:
+    basedir = os.path.abspath(os.path.dirname(__file__))
+    database_path = os.path.join(basedir, 'data', 'movies.db')
 
-# Tell Flask-SQLAlchemy to use that database
-app.config['SQLALCHEMY_DATABASE_URI'] = f"sqlite:///{database_path}"
-app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
-db.init_app(app)  # Link the database and the app.
+    app.config['SQLALCHEMY_DATABASE_URI'] = f"sqlite:///{database_path}"
+    app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
-data_manager = DataManager() # Create an object of DataManager class
+    db.init_app(app)  # Bind SQLAlchemy to the app
+except Exception as e:
+    raise RuntimeError(f"Failed to configure database: {e}")
+
+# ------------------ Initialize DataManager ------------------
+try:
+    data_manager = DataManager()
+except SQLAlchemyError as e:
+    raise RuntimeError(f"Failed to initialize DataManager: {e}")
+
+# Error handling with flask
+@app.errorhandler(404)
+def not_found_error(error):
+    return render_template('errors/404.html'), 404
+
+@app.errorhandler(500)
+def internal_error(error):
+    return render_template('errors/500.html'), 500
+
 
 @app.route('/', methods=['Get'])
 def home():
@@ -108,17 +134,17 @@ def update_movie(user_id, movie_id):
 
 
 @app.route('/users/<int:user_id>/movies/<int:movie_id>/delete', methods=['POST'])
-def delete_movie(movie_id):
+def delete_movie(user_id, movie_id):
     movie = Movie.query.get_or_404(movie_id)
 
     if movie:
         data_manager.delete_movie(movie_id)
         flash(f"Deleted movie '{movie.title}'.", "success")
-        return redirect(url_for('get_movies', user_id=movie.user_id))
+        return redirect(url_for('get_movies', user_id=user_id))
 
     else:
         flash("Movie not found!", "error")
-        return redirect(url_for('get_movies', user_id=movie.user_id))
+        return redirect(url_for('get_movies', user_id=user_id))
 
 
 if __name__ == '__main__':
