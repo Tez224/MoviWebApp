@@ -32,14 +32,21 @@ def add_user():
     name = request.form['name']
 
     if name:
-        new_user = User(name=name)
-        db.session.add(new_user)
-        db.session.commit()
+        data_manager.add_user(name)
         flash(f"User {name} added successfully!", "success")
     else:
         flash("Please enter a valid name.", "error")
 
     return redirect('/')
+
+
+@app.route('/users/<int:user_id>/movies', methods=['GET'])
+def get_movies(user_id):
+    user = data_manager.get_user_by_id(user_id)
+    movies = data_manager.get_movies(user_id)
+
+    return render_template('movies.html',user=user, movies=movies)
+
 
 if __name__ == '__main__':
     # Ensure the 'data/' folder really exists at runtime
