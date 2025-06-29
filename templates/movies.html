@@ -1,24 +1,73 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <title>{{ user.name }}'s Movies</title>
-</head>
-<body>
+<!-- templates/movies.html -->
+{% extends "base.html" %}
 
-    <h1>🎬 Movies by {{ user.name }}</h1>
+{% block content %}
+    <h2>🎥 Movie for {{ user.name }}</h2>
 
-    {% if movies %}
-        <ul>
-        {% for movie in movies %}
-            <li><strong>{{ movie.title }}</strong> ({{ movie.publication_year or 'N/A' }})</li>
-        {% endfor %}
+    <!-- Flash messages -->
+    {% with messages = get_flashed_messages(with_categories=true) %}
+      {% if messages %}
+        <ul class="flashes">
+          {% for category, message in messages %}
+            <li class="{{ category }}">{{ message }}</li>
+          {% endfor %}
         </ul>
-    {% else %}
-        <p>This user hasn't added any movies yet.</p>
-    {% endif %}
+      {% endif %}
+    {% endwith %}
 
-    <p><a href="{{ url_for('home') }}">← Back to All Users</a></p>
+    <!-- form to add new movie via title and add all details automatically with API -->
+    <h2>🎬 Add a Movie by title</h2>
+    <p> (add details automatically) </p>
+        <form method="POST" action="{{ url_for('add_movie_omdb', user_id=user.id) }}">
+            <label for="title">Movie Title:</label>
+            <input type="text" name="title" required>
+            <button type="submit">Fetch from OMDb</button>
+        </form>
 
-</body>
-</html>
+    <!-- List movies -->
+    <h2>User's Movies</h2>
+    <ul>
+        {% for movie in movies %}
+            <li>
+                <form method="POST" action="{{ url_for('update_movie', user_id=user.id, movie_id=movie.id) }}" style="display: inline;">
+                    <input type="text" name="title" value="{{ movie.title }}" required>
+                    <button type="submit">Update</button>
+                </form>
+                <br>
+                Year: {{ movie.publication_year or 'N/A' }} |
+                Genre: {{ movie.genre or 'Unknown' }} |
+                Rating: {{ movie.rating or 'Not rated' }}
+                Director: {{ movie.director or 'Unknown' }}<br>
+                Runtime: {{ movie.runtime or 'N/A' }}<br>
+                {% if movie.poster_url %}
+                    <img src="{{ movie.poster_url }}" alt="{{ movie.title }} poster" width="150">
+                {% endif %}
+                <form method="POST" action="{{ url_for('delete_movie', user_id=user.id, movie_id=movie.id) }}" style="display: inline;">
+                    <button type="submit" onclick="return confirm('Are you sure you want to delete this movie?');">🗑️ Delete</button>
+                </form>
+            </li>
+        {% else %}
+            <li>No movies found.</li>
+        {% endfor %}
+    </ul>
+
+    <!-- Form to add a new movie manually -->
+    <h2>Add a New Movie manually</h2>
+    <p> (add all details manually) </p>
+    <form method="POST" action="{{ url_for('add_movie', user_id=user.id) }}">
+        <label for="title">Title:</label>
+        <input type="text" id="title" name="title" required>
+
+        <label for="genre">Genre:</label>
+        <input type="text" id="genre" name="genre">
+
+        <label for="year">Year:</label>
+        <input type="number" id="year" name="publication_year">
+
+        <label for="rating">Rating:</label>
+        <input type="number" step="0.1" id="rating" name="rating">
+
+        <button type="submit">Add Movie</button>
+    </form>
+
+{% endblock %}
