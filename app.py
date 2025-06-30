@@ -32,29 +32,35 @@ except Exception as e:
     raise RuntimeError(f"Failed to configure database: {e}")
 
 # ------------------ Initialize DataManager ------------------
-try:
-    data_manager = DataManager()
-except SQLAlchemyError as e:
-    raise RuntimeError(f"Failed to initialize DataManager: {e}")
+with app.app_context():
+    try:
+        data_manager = DataManager()
+    except SQLAlchemyError as e:
+        raise RuntimeError(f"Failed to initialize DataManager: {e}")
 
 # Error handling with flask
 @app.errorhandler(404)
 def not_found_error(error):
+    """ Error handler for 404 errors """
     return render_template('errors/404.html'), 404
 
 @app.errorhandler(500)
 def internal_error(error):
+    """ Error handler for 500 errors """
     return render_template('errors/500.html'), 500
 
+# ------------------ Routes ------------------
 
 @app.route('/', methods=['Get'])
 def home():
+    """Home page showing all registered users."""
     users = data_manager.get_users()
     return render_template('home.html', users=users)
 
 
 @app.route('/users', methods=['POST'])
 def add_user():
+    """Add a new user and redirect back to the homepage."""
     name = request.form['name']
 
     if name:
@@ -68,6 +74,7 @@ def add_user():
 
 @app.route('/users/<int:user_id>/movies', methods=['GET'])
 def get_movies(user_id):
+    """Show the list of movies for a specific user."""
     user = data_manager.get_user_by_id(user_id)
     movies = data_manager.get_movies(user_id)
 
@@ -76,6 +83,7 @@ def get_movies(user_id):
 
 @app.route('/users/<int:user_id>/movies', methods=['POST'])
 def add_movie(user_id):
+    """Manually add a new movie to the user's collection."""
     user = data_manager.get_user_by_id(user_id)
 
     if not user:
@@ -96,6 +104,7 @@ def add_movie(user_id):
 
 @app.route('/users/<int:user_id>/movies/omdb', methods=['POST'])
 def add_movie_omdb(user_id):
+    """Add a movie via title using the OMDb API."""
     title = request.form.get('title')
 
     if not title:
@@ -115,6 +124,7 @@ def add_movie_omdb(user_id):
 
 @app.route('/users/<int:user_id>/movies/<int:movie_id>/update', methods=['POST'])
 def update_movie(user_id, movie_id):
+    """Update the title of a movie for a given user."""
     movie = Movie.query.get_or_404(movie_id)
 
     # check if movie belongs to user
@@ -135,6 +145,7 @@ def update_movie(user_id, movie_id):
 
 @app.route('/users/<int:user_id>/movies/<int:movie_id>/delete', methods=['POST'])
 def delete_movie(user_id, movie_id):
+    """Delete a movie from a user's list."""
     movie = Movie.query.get_or_404(movie_id)
 
     if movie:
@@ -151,9 +162,9 @@ if __name__ == '__main__':
     # Ensure the 'data/' folder really exists at runtime
     os.makedirs('data', exist_ok=True)
 
-    #with app.app_context():
-        #db.create_all()
-        #print(Movie.__table__)
-        #print(User.__table__)
-        #print("Database and tables created.")
+    with app.app_context():
+        if not os.path.exists(database_path):
+            db.create_all()
+            print("📁 Database and tables created.")
+
     app.run(debug=True)

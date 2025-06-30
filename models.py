@@ -3,6 +3,14 @@ from flask_sqlalchemy import SQLAlchemy
 db = SQLAlchemy()
 
 class User(db.Model):
+    """
+    Represents a user in the application.
+
+    Attributes:
+        id (int): Primary key.
+        name (str): The user's name.
+        movies (list): One-to-many relationship to Movie.
+    """
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(100), nullable=False)
 
@@ -17,6 +25,20 @@ class User(db.Model):
 
 
 class Movie(db.Model):
+    """
+    Represents a movie added by a user.
+
+    Attributes:
+        id (int): Primary key.
+        title (str): Movie title.
+        publication_year (int): Year of release.
+        genre (str): Genre of the movie.
+        rating (float): Rating (e.g. IMDb).
+        poster_url (str): URL to the movie poster image.
+        director (str): Movie director.
+        runtime (str): Runtime in minutes (e.g., '120 min').
+        user_id (int): Foreign key linking to the user who added the movie.
+    """
     id = db.Column(db.Integer, primary_key=True)
     title = db.Column(db.String(100), nullable=False)
     publication_year = db.Column(db.Integer, nullable=True)
