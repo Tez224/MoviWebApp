@@ -1,0 +1,100 @@
+/* === Base Styles === */
+body {
+    font-family: Arial, sans-serif;
+    background-color: #eef2f5; /* light bluish-gray */
+    padding: 20px;
+    color: #2c3e50; /* dark slate */
+}
+
+.container {
+    max-width: 800px;
+    margin: 0 auto;
+}
+
+/* === Navigation Bar === */
+.navbar {
+    background-color: #2a4365; /* deep blue */
+    padding: 10px 20px;
+    border-radius: 8px;
+}
+
+.navbar a {
+    color: #f1f1f1;
+    text-decoration: none;
+    font-weight: bold;
+}
+
+.navbar a:hover {
+    color: #cbd5e0; /* softer hover */
+    text-decoration: underline;
+}
+
+/* === Flash Messages, Forms, Buttons, etc. === */
+.flashes {
+    list-style: none;
+    padding: 0;
+}
+
+/* === Movie Card Layout === */
+.movie-card {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    background-color: #ffffff;
+    margin: 20px 0;
+    padding: 15px;
+    border-radius: 10px;
+    box-shadow: 0 4px 8px rgba(42, 67, 101, 0.1); /* soft deep blue shadow */
+}
+
+/* === Movie info === */
+.movie-info {
+    flex: 1;
+    padding-right: 20px;
+}
+
+.poster-container img {
+    max-width: 150px;
+    border-radius: 6px;
+}
+
+/* === Forms and Buttons === */
+.inline-form {
+    display: flex;
+    gap: 10px;
+    align-items: center;
+    margin-bottom: 10px;
+}
+
+.inline-form input[type="text"] {
+    flex: 1;
+    padding: 6px 10px;
+    border: 1px solid #ccd6e0;
+    border-radius: 5px;
+    background-color: #f7fafc;
+}
+
+/* Primary button (e.g. update) */
+button {
+    padding: 6px 12px;
+    background-color: #3182ce; /* blue */
+    border: none;
+    color: white;
+    border-radius: 5px;
+    cursor: pointer;
+    font-weight: bold;
+}
+
+button:hover {
+    background-color: #2b6cb0;
+}
+
+/* Delete button */
+.delete-button {
+    background-color: #e53e3e; /* soft red */
+    margin-top: 20px;
+}
+
+.delete-button:hover {
+    background-color: #c53030;
+}
