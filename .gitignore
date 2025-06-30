@@ -10,3 +10,8 @@ __pycache__/
 
 # Ignore the database file
 data/movies.db
+
+*.sqlite
+*.sqlite3
+
+data/
